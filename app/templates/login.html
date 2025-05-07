@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "index.html" %}
 
 {% block title %}Login{% endblock %}
 
@@ -14,7 +14,7 @@
         <div class="row gtr-150">
             <div class="col-8 col-12-narrower">
                 <!-- Login Form -->
-                <form method="POST" action="{{ url_for('login') }}">
+                <form method="POST" action="{{ url_for('main.login') }}">
                     <div class="row gtr-50">
                         <div class="col-12">
                             <input type="email" name="email" placeholder="Email Address" required />
@@ -25,7 +25,7 @@
                         <div class="col-12">
                             <ul class="buttons">
                                 <li><input type="submit" class="special" value="Login" /></li>
-                                <li><a href="{{ url_for('forgot_password') }}" class="button small">Forgot Password?</a></li>
+                                <li><a href="{{ url_for('main.index') }}" class="button small">Forgot Password?</a></li>
                             </ul>
                         </div>
                     </div>
