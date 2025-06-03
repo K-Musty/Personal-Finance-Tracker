@@ -3,10 +3,15 @@ from wtforms import StringField, SubmitField, EmailField, PasswordField, FloatFi
 from wtforms.validators import DataRequired
 
 class SignupForm(FlaskForm):
-    name = StringField("name", [DataRequired()])
-    email = EmailField('email', [DataRequired()])
-    password = PasswordField('password', [DataRequired()])
-    submit = SubmitField()
+    name = StringField("Name", [DataRequired()])
+    email = EmailField('Email', [DataRequired()])
+    password = PasswordField('Password', [DataRequired()])
+    submit = SubmitField("Sign Up!!")
+
+class LoginForm(FlaskForm):
+    name = StringField("Name ", validators=[DataRequired()])
+    email = EmailField("Email ", validators=[DataRequired()])
+    submit = SubmitField("Let me in !!")
 
 class TransactionForm(FlaskForm):
     amount = FloatField("Amount", [DataRequired()])

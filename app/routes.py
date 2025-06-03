@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
+from forms import LoginForm, SignupForm, TransactionForm
 
 bp = Blueprint('main', __name__)
 
