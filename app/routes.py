@@ -1,7 +1,16 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from forms import LoginForm, SignupForm, TransactionForm
+from models import User
+from flask_login import LoginManager, logout_user, login_user, current_user, confirm_login, login_required
 
 bp = Blueprint('main', __name__)
+
+login_manager = LoginManager()
+login_manager.init_app(bp)
+
+@login_manager.user_loader
+def load_user(user_id):
+    User.query.get(int(user_id))
 
 @bp.route('/')
 def index():
