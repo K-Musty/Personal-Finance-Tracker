@@ -16,7 +16,8 @@ def load_user(user_id):
 def index():
     return render_template('index.html')
 
-bp.route('/dashboard')
+@login_required
+@bp.route('/dashboard')
 def user_dashboard():
     return render_template('dashboard.html')
 
