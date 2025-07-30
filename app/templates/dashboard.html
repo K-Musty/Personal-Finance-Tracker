@@ -9,7 +9,7 @@
     <header class="special container">
         <span class="icon solid fa-chart-line"></span>
         <h2>Your <strong>Financial Dashboard</strong></h2>
-        <p>Welcome back, {{ current_user.first_name }}! Here's your financial overview.</p>
+        <p>Welcome back, {{ current_user.name }}! Here's your financial overview.</p>
     </header>
 
     <section class="wrapper style4 container">
@@ -130,60 +130,8 @@
     </section>
 
     {% else %}
-    <!-- LOGIN VIEW -->
-    <header class="special container">
-        <span class="icon solid fa-user"></span>
-        <h2>Welcome <strong>Back</strong></h2>
-        <p>Sign in to access your financial dashboard.</p>
-    </header>
-
-    <section class="wrapper style4 container">
-        <div class="row gtr-150">
-            <div class="col-8 col-12-narrower">
-                <!-- Login Form -->
-                <form method="POST" action="{{ url_for('main.login') }}">
-                    {{ form.hidden_tag() }}
-                    <div class="row gtr-50">
-                        <div class="col-12">
-                            {{ form.email(placeholder="Email Address", required=true) }}
-                            {% for error in form.email.errors %}
-                                <span class="form-error">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                        <div class="col-12">
-                            {{ form.password(placeholder="Password", required=true) }}
-                            {% for error in form.password.errors %}
-                                <span class="form-error">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                        <div class="col-12">
-                            <ul class="buttons">
-                                <li><input type="submit" class="special" value="Login" /></li>
-                                <li><a href="{{ url_for('main.reset_password_request') }}" class="button small">Forgot Password?</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="col-4 col-12-narrower">
-                <div class="sidebar">
-                    <section>
-                        <header>
-                            <h3>New Here?</h3>
-                        </header>
-                        <p>Create an account to start tracking your finances and get personalized insights.</p>
-                        <footer>
-                            <ul class="buttons">
-                                <li><a href="{{ url_for('main.signup') }}" class="button small">Sign Up</a></li>
-                            </ul>
-                        </footer>
-                    </section>
-                </div>
-            </div>
-        </div>
-    </section>
-    {% endif %}
 </article>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
