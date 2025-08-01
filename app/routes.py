@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import logout_user, login_user, current_user, confirm_login, login_required
 from .extensions import db, login_manager
-from .models import User
+from .models import User, Transaction
+from .forms import TransactionForm
 
 bp = Blueprint('main', __name__)
 
@@ -50,3 +51,19 @@ def login():
 @bp.route("/transactions")
 def transactions():
     return "<h1> Hi </h1>"
+
+@bp.route('/add_transaction', methods=['GET', 'POST'])
+@login_required
+def add_transaction():
+    form = TransactionForm()
+    if form.validate_on_submit():
+        transaction = Transaction(
+            amount=form.amount.data,
+            category=form.category.data,
+            description=form.description.data,
+            user_id=current_user.id
+        )
+        db.session.add(transaction)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('add_transaction.html', form=form)
