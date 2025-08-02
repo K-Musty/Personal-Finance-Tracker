@@ -13,43 +13,24 @@
 
 			<!-- Header -->
 				<header id="header" class="alt">
-					<h1 id="logo"><a href="{{ url_for('main.index') }}"><span>Personal </span>Finance Tracker</a></h1>
+    				<h1 id="logo"><a href="{{ url_for('main.index') }}"><span>Personal </span>Finance Tracker</a></h1>
 					<nav id="nav">
 						<ul>
-							<li class="current"><a href="{{ url_for('main.index') }}">Welcome</a></li>
-							<li><a href="{{ url_for('main.login') }}" class="button primary">Login</a></li>
+							<li class="{% if request.endpoint == 'main.index' %}current{% endif %}">
+								<a href="{{ url_for('main.index') }}">Welcome</a>
+							</li>
+							{% if current_user.is_authenticated %}
+								<li class="current" style="color: black"><a href="{{ url_for('main.user_dashboard') }}" class="button secondary">Dashboard</a></li>
+								<li><a href="{{ url_for('main.logout') }}" class="button primary">Logout</a></li>
+							{% else %}
+								<li><a href="{{ url_for('main.login') }}" class="button primary">Login</a></li>
+							{% endif %}
 						</ul>
 					</nav>
 				</header>
+			<!-- Header -->
 
-			<!-- Banner -->
-				<section id="banner">
 
-					<!--
-						".inner" is set up as an inline-block so it automatically expands
-						in both directions to fit whatever's inside it. This means it won't
-						automatically wrap lines, so be sure to use line breaks where
-						appropriate (<br />).
-					-->
-					<div class="inner">
-
-						<header>
-							<h2>TWENTY</h2>
-						</header>
-						<p>This is <strong>Twenty</strong>, a free
-						<br />
-						responsive template
-						<br />
-						by <a href="http://html5up.net">HTML5 UP</a>.</p>
-						<footer>
-							<ul class="buttons stacked">
-								<li><a href="#main" class="button fit scrolly">Tell Me More</a></li>
-							</ul>
-						</footer>
-
-					</div>
-
-				</section>
 
 			<!-- Main -->
 			{% block content %}

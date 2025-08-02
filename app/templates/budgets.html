@@ -1,0 +1,17 @@
+{% extends "index.html" %}
+{% block title %}Manage Budgets{% endblock %}
+{% block content %}
+<section>
+    <h2>Your Budgets</h2>
+    {% if budgets %}
+        <ul>
+            {% for budget in budgets %}
+                <li>{{ budget.category }} - ${{ "%.2f"|format(budget.amount) }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No budgets added yet.</p>
+        <a href="#" class="button">Add Budget (Coming Soon)</a>
+    {% endif %}
+</section>
+{% endblock %}

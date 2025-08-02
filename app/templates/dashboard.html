@@ -1,15 +1,14 @@
 {% extends "index.html" %}
 
-{% block title %}{% if current_user.is_authenticated %}Dashboard{% else %}Login{% endif %}{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
 <article id="main">
     {% if current_user.is_authenticated %}
-    <!-- DASHBOARD VIEW -->
     <header class="special container">
         <span class="icon solid fa-chart-line"></span>
         <h2>Your <strong>Financial Dashboard</strong></h2>
-        <p>Welcome back, {{ current_user.name }}! Here's your financial overview.</p>
+        <p>Welcome, {{ current_user.name }}!</p>
     </header>
 
     <section class="wrapper style4 container">
@@ -38,133 +37,156 @@
             </div>
         </div>
 
-        <!-- Charts and Transactions -->
-        <div class="row gtr-150">
-            <div class="col-8 col-12-narrower">
-                <section>
-                    <header>
-                        <h3>Spending Overview</h3>
-                    </header>
-                    <div class="chart-container">
-                        <canvas id="spendingChart"></canvas>
+        <!-- Add Transaction Form -->
+        <section>
+            <header>
+                <h3>Add New Transaction</h3>
+            </header>
+            <form action="{{ url_for('main.add_transaction') }}" method="post">
+                {{ form.hidden_tag() }}
+                <div class="row gtr-50">
+                    <div class="col-3 col-12-mobile">
+                        {{ form.amount.label }}
+                        {{ form.amount(size=20) }}
                     </div>
-                </section>
-
-                <section>
-                    <header>
-                        <h3>Recent Transactions</h3>
-                    </header>
-                    <div class="table-wrapper">
-                        <table class="alt">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Description</th>
-                                    <th>Category</th>
-                                    <th>Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for transaction in recent_transactions %}
-                                <tr>
-                                    <td>{{ transaction.date.strftime('%m/%d/%Y') }}</td>
-                                    <td>{{ transaction.description }}</td>
-                                    <td>{{ transaction.category }}</td>
-                                    <td class="{% if transaction.amount >= 0 %}positive{% else %}negative{% endif %}">
-                                        ${{ "%.2f"|format(transaction.amount) }}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="col-3 col-12-mobile">
+                        {{ form.category.label }}
+                        {{ form.category() }}
                     </div>
-                    <footer>
-                        <ul class="buttons">
-                            <li><a href="{{ url_for('main.transactions') }}" class="button small">View All</a></li>
-                            <li><a href="{{ url_for('main.add_transaction') }}" class="button small">Add Transaction</a></li>
-                        </ul>
-                    </footer>
-                </section>
-            </div>
-
-            <div class="col-4 col-12-narrower">
-                <div class="sidebar">
-                    <!-- Budget Progress -->
-                    <section>
-                        <header>
-                            <h3>Budget Progress</h3>
-                        </header>
-                        {% for budget in budgets %}
-                        <div class="budget-item">
-                            <h4>{{ budget.category }}</h4>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: {{ (budget.spent/budget.amount*100)|round(1) }}%">
-                                    <span>{{ (budget.spent/budget.amount*100)|round(1) }}%</span>
-                                </div>
-                            </div>
-                            <p>${{ "%.2f"|format(budget.spent) }} of ${{ "%.2f"|format(budget.amount) }}</p>
-                        </div>
-                        {% endfor %}
-                        <footer>
-                            <ul class="buttons">
-                                <li><a href="{{ url_for('main.budgets') }}" class="button small">Manage Budgets</a></li>
-                            </ul>
-                        </footer>
-                    </section>
-
-                    <!-- Quick Actions -->
-                    <section>
-                        <header>
-                            <h3>Quick Actions</h3>
-                        </header>
-                        <ul class="buttons stacked">
-                            <li><a href="{{ url_for('main.add_transaction') }}" class="button small">Add Transaction</a></li>
-                            <li><a href="{{ url_for('main.reports') }}" class="button small">Generate Report</a></li>
-                            <li><a href="{{ url_for('main.goals') }}" class="button small">View Goals</a></li>
-                            <li><a href="{{ url_for('main.profile') }}" class="button small">Account Settings</a></li>
-                        </ul>
-                    </section>
+                    <div class="col-4 col-12-mobile">
+                        {{ form.description.label }}
+                        {{ form.description(size=30) }}
+                    </div>
+                    <div class="col-2 col-12-mobile">
+                        {{ form.submit(class_='button fit') }}
+                    </div>
                 </div>
+            </form>
+        </section>
+
+        <!-- Spending Overview Chart -->
+        <section>
+            <header>
+                <h3>Spending Overview</h3>
+            </header>
+            <div class="chart-container">
+                <canvas id="spendingChart"></canvas>
             </div>
-        </div>
+        </section>
+
+        <!-- Recent Transactions Table -->
+        <section>
+            <header>
+                <h3>Recent Transactions</h3>
+            </header>
+            <div class="table-wrapper">
+                <table class="alt">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in recent_transactions %}
+                        <tr>
+                            <td>{{ transaction.id }}</td>
+                            <td>{{ transaction.description }}</td>
+                            <td>{{ transaction.category }}</td>
+                            <td class="{% if transaction.amount >= 0 %}positive{% else %}negative{% endif %}">
+                                ${{ "%.2f"|format(transaction.amount) }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Goals Form -->
+        <section>
+            <header>
+                <h3>Set Financial Goal</h3>
+            </header>
+            <form action="{{ url_for('main.add_goal') }}" method="post">
+                {{ goal_form.hidden_tag() }}
+                <div class="row gtr-50">
+                    <div class="col-4 col-12-mobile">
+                        {{ goal_form.category.label }}
+                        {{ goal_form.category(size=30) }}
+                    </div>
+                    <div class="col-4 col-12-mobile">
+                        {{ goal_form.amount.label }}
+                        {{ goal_form.amount(size=20) }}
+                    </div>
+                    <div class="col-4 col-12-mobile">
+                        {{ goal_form.submit(class_='button fit') }}
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- Budgets Progress -->
+        <section>
+            <header>
+                <h3>Budget Progress</h3>
+            </header>
+            {% for budget in budgets %}
+            <div class="budget-item">
+                <h4>{{ budget.category }}</h4>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ (budget.spent / budget.amount * 100)|round(1) }}%">
+                        <span>{{ (budget.spent / budget.amount * 100)|round(1) }}%</span>
+                    </div>
+                </div>
+                <p>${{ "%.2f"|format(budget.spent) }} of ${{ "%.2f"|format(budget.amount) }}</p>
+            </div>
+            {% endfor %}
+        </section>
+
     </section>
 
-    {% else %}
+    {% endif %}
 </article>
-{% endif %}
 {% endblock %}
 
 {% block scripts %}
-{% if current_user.is_authenticated %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Spending Chart
-        const ctx = document.getElementById('spendingChart').getContext('2d');
-        const spendingChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: {{ spending_categories|tojson|safe }},
-                datasets: [{
-                    label: 'Spending by Category',
-                    data: {{ spending_amounts|tojson|safe }},
-                    backgroundColor: [
-                        '#4CAF50', '#2196F3', '#FFC107', '#FF5722',
-                        '#9C27B0', '#607D8B', '#00BCD4', '#8BC34A'
-                    ],
-                    borderWidth: 1
-                }]
+    const ctx = document.getElementById('spendingChart').getContext('2d');
+    const spendingChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ spending_categories|tojson|safe }},
+            datasets: [{
+                label: 'Spending by Category',
+                data: {{ spending_amounts|tojson|safe }},
+                backgroundColor: [
+                    '#4CAF50', '#2196F3', '#FFC107', '#FF5722',
+                    '#9C27B0', '#607D8B', '#00BCD4', '#8BC34A'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + context.parsed.y.toFixed(2);
+                        }
                     }
                 }
             }
-        });
+        }
     });
 </script>
-{% endif %}
 {% endblock %}

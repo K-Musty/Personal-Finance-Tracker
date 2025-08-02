@@ -18,3 +18,8 @@ class TransactionForm(FlaskForm):
     category = SelectField('Category', choices=[('income','Income'), ('expense','Expense'), ('savings','Savings')])
     description = StringField('Description')
     submit = SubmitField('Add Transaction')
+
+class GoalForm(FlaskForm):
+    category = StringField('Goal Category', [DataRequired()])
+    amount = FloatField('Target Amount', [DataRequired()])
+    submit = SubmitField('Set Goal')
