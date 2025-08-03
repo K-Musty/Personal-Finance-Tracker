@@ -4,189 +4,147 @@
 
 {% block content %}
 <article id="main">
-    {% if current_user.is_authenticated %}
     <header class="special container">
         <span class="icon solid fa-chart-line"></span>
         <h2>Your <strong>Financial Dashboard</strong></h2>
-        <p>Welcome, {{ current_user.name }}!</p>
+        <p>Welcome back, {{ current_user.name }}! Here's your financial overview.</p>
     </header>
 
     <section class="wrapper style4 container">
-        <!-- Quick Stats Row -->
-        <div class="row gtr-150">
-            <div class="col-4 col-12-narrower">
-                <div class="box highlight">
-                    <span class="icon solid major fa-wallet"></span>
-                    <h3>Current Balance</h3>
-                    <p>${{ "%.2f"|format(current_balance) }}</p>
-                </div>
+        <div class="dashboard-grid">
+
+            <!-- Left Side: Chart & Transactions -->
+            <div class="left-panel">
+                <section>
+                    <header><h3>Spending Overview</h3></header>
+                    <div class="chart-container">
+                        <canvas id="spendingChart"></canvas>
+                    </div>
+                </section>
+
+                <section>
+                    <header><h3>Recent Transactions</h3></header>
+                    <div class="table-wrapper">
+                        <table class="alt">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in recent_transactions %}
+                                <tr>
+                                    <td>{{ transaction.description }}</td>
+                                    <td>{{ transaction.category }}</td>
+                                    <td class="{% if transaction.amount >= 0 %}positive{% else %}negative{% endif %}">
+                                        ${{ "%.2f"|format(transaction.amount) }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
-            <div class="col-4 col-12-narrower">
-                <div class="box highlight">
-                    <span class="icon solid major fa-arrow-up" style="color: #4CAF50;"></span>
-                    <h3>Income (30d)</h3>
-                    <p>${{ "%.2f"|format(recent_income) }}</p>
-                </div>
+
+            <!-- Right Side: Add Transaction -->
+            <div class="right-panel">
+                <section>
+                    <header><h3>Add Transaction</h3></header>
+                    <form id="add-transaction-form" method="POST" action="{{ url_for('main.add_transaction') }}">
+                        {{ form.hidden_tag() }}
+                        <div class="field">{{ form.amount.label }} {{ form.amount(required=True) }}</div>
+                        <div class="field">{{ form.category.label }}
+                            <select name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="income">Income</option>
+                                <option value="expense">Expense</option>
+                                <option value="savings">Savings</option>
+                            </select>
+                        </div>
+                        <div class="field">{{ form.description.label }} {{ form.description(required=True) }}</div>
+                        <div class="actions">{{ form.submit() }}</div>
+                    </form>
+                </section>
             </div>
-            <div class="col-4 col-12-narrower">
-                <div class="box highlight">
-                    <span class="icon solid major fa-arrow-down" style="color: #F44336;"></span>
-                    <h3>Expenses (30d)</h3>
-                    <p>${{ "%.2f"|format(recent_expenses) }}</p>
-                </div>
-            </div>
+
         </div>
-
-        <!-- Add Transaction Form -->
-        <section>
-            <header>
-                <h3>Add New Transaction</h3>
-            </header>
-            <form action="{{ url_for('main.add_transaction') }}" method="post">
-                {{ form.hidden_tag() }}
-                <div class="row gtr-50">
-                    <div class="col-3 col-12-mobile">
-                        {{ form.amount.label }}
-                        {{ form.amount(size=20) }}
-                    </div>
-                    <div class="col-3 col-12-mobile">
-                        {{ form.category.label }}
-                        {{ form.category() }}
-                    </div>
-                    <div class="col-4 col-12-mobile">
-                        {{ form.description.label }}
-                        {{ form.description(size=30) }}
-                    </div>
-                    <div class="col-2 col-12-mobile">
-                        {{ form.submit(class_='button fit') }}
-                    </div>
-                </div>
-            </form>
-        </section>
-
-        <!-- Spending Overview Chart -->
-        <section>
-            <header>
-                <h3>Spending Overview</h3>
-            </header>
-            <div class="chart-container">
-                <canvas id="spendingChart"></canvas>
-            </div>
-        </section>
-
-        <!-- Recent Transactions Table -->
-        <section>
-            <header>
-                <h3>Recent Transactions</h3>
-            </header>
-            <div class="table-wrapper">
-                <table class="alt">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Description</th>
-                            <th>Category</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for transaction in recent_transactions %}
-                        <tr>
-                            <td>{{ transaction.id }}</td>
-                            <td>{{ transaction.description }}</td>
-                            <td>{{ transaction.category }}</td>
-                            <td class="{% if transaction.amount >= 0 %}positive{% else %}negative{% endif %}">
-                                ${{ "%.2f"|format(transaction.amount) }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Goals Form -->
-        <section>
-            <header>
-                <h3>Set Financial Goal</h3>
-            </header>
-            <form action="{{ url_for('main.add_goal') }}" method="post">
-                {{ goal_form.hidden_tag() }}
-                <div class="row gtr-50">
-                    <div class="col-4 col-12-mobile">
-                        {{ goal_form.category.label }}
-                        {{ goal_form.category(size=30) }}
-                    </div>
-                    <div class="col-4 col-12-mobile">
-                        {{ goal_form.amount.label }}
-                        {{ goal_form.amount(size=20) }}
-                    </div>
-                    <div class="col-4 col-12-mobile">
-                        {{ goal_form.submit(class_='button fit') }}
-                    </div>
-                </div>
-            </form>
-        </section>
-
-        <!-- Budgets Progress -->
-        <section>
-            <header>
-                <h3>Budget Progress</h3>
-            </header>
-            {% for budget in budgets %}
-            <div class="budget-item">
-                <h4>{{ budget.category }}</h4>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: {{ (budget.spent / budget.amount * 100)|round(1) }}%">
-                        <span>{{ (budget.spent / budget.amount * 100)|round(1) }}%</span>
-                    </div>
-                </div>
-                <p>${{ "%.2f"|format(budget.spent) }} of ${{ "%.2f"|format(budget.amount) }}</p>
-            </div>
-            {% endfor %}
-        </section>
-
     </section>
-
-    {% endif %}
 </article>
 {% endblock %}
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const ctx = document.getElementById('spendingChart').getContext('2d');
-    const spendingChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: {{ spending_categories|tojson|safe }},
-            datasets: [{
-                label: 'Spending by Category',
-                data: {{ spending_amounts|tojson|safe }},
-                backgroundColor: [
-                    '#4CAF50', '#2196F3', '#FFC107', '#FF5722',
-                    '#9C27B0', '#607D8B', '#00BCD4', '#8BC34A'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return '$' + context.parsed.y.toFixed(2);
-                        }
-                    }
-                }
-            }
-        }
-    });
-</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
+
+{% block styles %}
+<style>
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.chart-container {
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    height: 300px; /* This forces space */
+}
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+}
+.left-panel {
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.right-panel {
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.field {
+    margin-bottom: 1rem;
+}
+.actions {
+    text-align: center;
+}
+.alt {
+    width: 100%;
+    border-collapse: collapse;
+}
+.alt th, .alt td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+.alt tr:nth-child(even){background-color: #f9f9f9;}
+.alt tr:hover {background-color: #f1f1f1;}
+.alt th {
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    text-align: left;
+}
+@media screen and (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+</style>
 {% endblock %}

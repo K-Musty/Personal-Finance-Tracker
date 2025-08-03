@@ -1,5 +1,5 @@
 # routes.py
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import logout_user, login_user, current_user, login_required
 from .extensions import db
 from .models import User, Transaction, Goal
@@ -11,39 +11,53 @@ bp = Blueprint('main', __name__)
 def index():
     return render_template('index.html')
 
+@bp.route('/get_spending_data')
+@login_required
+def get_spending_data():
+    transactions = Transaction.query.filter_by(user_id=current_user.id).all()
+
+    category_spending = {}
+    for t in transactions:
+        if t.category != 'income':
+            category_spending[t.description] = category_spending.get(t.description, 0) + abs(t.amount)
+
+    # Ensure there's always data to show
+    if not category_spending:
+        category_spending = {'No Data': 1}
+
+    return jsonify({
+        'labels': list(category_spending.keys()),
+        'data': list(category_spending.values())
+    })
+
 @bp.route('/dashboard')
 @login_required
 def user_dashboard():
     transaction_form = TransactionForm()
-    goal_form = GoalForm()
 
     transactions = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.id.desc()).limit(5).all()
 
     total_income = sum(t.amount for t in transactions if t.category == 'income')
     total_expense = sum(t.amount for t in transactions if t.category == 'expense')
 
-    # Dummy budgets (you can replace with a Budget model later)
-    budgets = [
-        {'category': 'Food', 'amount': 500, 'spent': 200},
-        {'category': 'Transport', 'amount': 300, 'spent': 150}
-    ]
+    # Spending grouped by description for chart
+    category_spending = {}
+    for t in transactions:
+        if t.category != 'income':
+            category_spending[t.description] = category_spending.get(t.description, 0) + abs(t.amount)
 
-    category_spending = {
-        'Food': 200,
-        'Transport': 150,
-        'Entertainment': 100
-    }
+    if not category_spending:
+        category_spending = {'No Data': 1}
 
     return render_template('dashboard.html',
                            form=transaction_form,
-                           goal_form=goal_form,
                            current_balance=total_income - total_expense,
                            recent_income=total_income,
                            recent_expenses=total_expense,
                            recent_transactions=transactions,
-                           budgets=budgets,
                            spending_categories=list(category_spending.keys()),
                            spending_amounts=list(category_spending.values()))
+
 
 @bp.route('/signup', methods=['POST', 'GET'])
 def signup():
