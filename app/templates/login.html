@@ -1,52 +1,31 @@
-{% extends "index.html" %}
-
-{% block title %}Login{% endblock %}
+{% extends "base.html" %}
 
 {% block content %}
-<article id="main">
-    <header class="special container">
-        <span class="icon solid fa-user"></span>
-        <h2>Welcome <strong>Back</strong></h2>
-        <p>Sign in to access your financial dashboard.</p>
-    </header>
+<div class="auth-form">
+    <h2>Welcome Back</h2>
 
-    <section class="wrapper style4 container">
-        <div class="row gtr-150">
-            <div class="col-8 col-12-narrower">
-                <!-- Login Form -->
-                <form method="POST" action="{{ url_for('main.login') }}">
-                    <div class="row gtr-50">
-                        <div class="col-12">
-                            <input type="email" name="email" placeholder="Email Address" required />
-                        </div>
-                        <div class="col-12">
-                            <input type="password" name="password" placeholder="Password" required />
-                        </div>
-                        <div class="col-12">
-                            <ul class="buttons">
-                                <li><input type="submit" class="special" value="Login" /></li>
-                                <li><a href="{{ url_for('main.index') }}" class="button small">Forgot Password?</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="col-4 col-12-narrower">
-                <div class="sidebar">
-                    <section>
-                        <header>
-                            <h3>New Here?</h3>
-                        </header>
-                        <p>Create an account to start tracking your finances and get personalized insights.</p>
-                        <footer>
-                            <ul class="buttons">
-                                <li><a href="{{ url_for('main.signup') }}" class="button small">Sign Up</a></li>
-                            </ul>
-                        </footer>
-                    </section>
-                </div>
-            </div>
+    <form method="POST" action="{{ url_for('main.login') }}">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+            {% if form.email.errors %}
+                <div class="error">{{ form.email.errors[0] }}</div>
+            {% endif %}
         </div>
-    </section>
-</article>
+
+        <div class="form-group">
+            {{ form.password.label }}
+            {{ form.password(class="form-control") }}
+            {% if form.password.errors %}
+                <div class="error">{{ form.password.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="button primary">Log In</button>
+    </form>
+
+    <p>Don't have an account? <a href="{{ url_for('main.signup') }}">Sign up</a></p>
+</div>
 {% endblock %}

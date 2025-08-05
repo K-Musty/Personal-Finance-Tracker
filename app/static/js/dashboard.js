@@ -1,80 +1,62 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const monthSelector = document.getElementById('monthSelector');
+    const ctx = document.getElementById('spendingChart').getContext('2d');
     let spendingChart;
 
-    function renderChart(labels, data) {
-        const ctx = document.getElementById('spendingChart').getContext('2d');
+    // Fetch and populate months dropdown
+    fetch('/get_available_months')
+        .then(response => response.json())
+        .then(months => {
+            months.forEach(month => {
+                const option = document.createElement('option');
+                option.value = month;
+                option.textContent = new Date(month + "-01").toLocaleString('default', { month: 'long', year: 'numeric' });
+                monthSelector.appendChild(option);
+            });
+        });
 
-        if (spendingChart) {
-            spendingChart.destroy();
+    function fetchAndRenderChart(month = '') {
+        let url = '/get_spending_data';
+        if (month) {
+            url += `?month=${month}`;
         }
 
-        spendingChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Spending by Category',
-                    data: data,
-                    backgroundColor: [
-                        '#4CAF50', '#2196F3', '#FFC107', '#FF5722',
-                        '#9C27B0', '#607D8B', '#00BCD4', '#8BC34A'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (spendingChart) {
+                    spendingChart.destroy();  // Destroy previous chart
+                }
+                spendingChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
                     }
-                }
-            }
-        });
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching chart data:', error);
+            });
     }
 
-    function fetchChartData() {
-        fetch("/get_spending_data")
-            .then(response => response.json())
-            .then(data => {
-                renderChart(data.labels, data.data);
-            })
-            .catch(err => console.error("Error fetching chart data:", err));
-    }
+    // Initial Load
+    fetchAndRenderChart();
 
-    // Attach Add Transaction Form Handler
-    const form = document.getElementById('add-transaction-form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-
-            fetch('/add_transaction', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                } else {
-                    fetchChartData();  // Update Chart after adding
-                    this.reset();  // Clear form after submission
-                }
-            })
-            .catch(err => console.error("Error adding transaction:", err));
-        });
-    }
-
-    /function fetchChartData() {
-        fetch("/get_spending_data")
-            .then(response => response.json())
-            .then(data => {
-                console.log('Chart Data:', data);
-                renderChart(data.labels, data.data);
-            })
-            .catch(err => console.error("Chart Fetch Error", err));
-    }
-
-    fetchChartData();
+    // On Month Selection Change
+    monthSelector.addEventListener('change', function() {
+        const selectedMonth = this.value;
+        fetchAndRenderChart(selectedMonth);
+    });
 });

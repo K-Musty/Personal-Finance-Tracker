@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, EmailField, PasswordField, FloatField, SelectField
-from wtforms.validators import DataRequired
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, EmailField, FloatField, SelectField
+from wtforms.validators import DataRequired, Email
 
 class SignupForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
@@ -9,9 +9,9 @@ class SignupForm(FlaskForm):
     submit = SubmitField("Sign Up!!")
 
 class LoginForm(FlaskForm):
-    name = StringField("Name ", validators=[DataRequired()])
-    email = EmailField("Email ", validators=[DataRequired()])
-    submit = SubmitField("Let me in !!")
+    email = EmailField('Email', validators=[DataRequired(), Email()])  # Changed from name+email to just email
+    password = PasswordField('Password', validators=[DataRequired()])  # This was missing
+    submit = SubmitField('Log In')  # Changed submit text
 
 class TransactionForm(FlaskForm):
     amount = FloatField("Amount", [DataRequired()])
